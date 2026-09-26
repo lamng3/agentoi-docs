@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Architecture · AgentOI</title>
   <link rel="stylesheet" href="styles.css">
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.0/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "strict",
+      flowchart: { curve: "basis", htmlLabels: true }
+    });
+  </script>
 </head>
 <body>
   <header><a href="index.html"><strong>AgentOI</strong></a><nav><a href="getting-started.html">Get started</a><a class="active" href="architecture.html">Architecture</a><a href="api.html">API</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
@@ -12,6 +21,30 @@
     <p class="eyebrow">Guide 02 · System design</p>
     <h1>Architecture</h1>
     <p class="lede">The installable package is isolated under <code>src/agentoi/</code>. Everything else is support material.</p>
+
+    <h2>System overview</h2>
+    <div class="diagram" aria-label="AgentOI system architecture">
+      <pre class="mermaid">
+flowchart LR
+    Input["OWL / RDF / JSON-LD"] --> Parser["Parser"]
+    CLI["CLI or Python API"] --> Workspace["OntologyWorkspace"]
+    Parser --> Ontology["Ontology"]
+    Workspace --> Parser
+    Ontology --> Refine["Refinement"]
+    Refine --> Graph["ConceptGraph or Hypergraph"]
+    Graph --> Embed["Graph + text embeddings"]
+    Embed --> Retrieve["Vector and web retrieval"]
+    Retrieve --> Agent["Agent runtime"]
+    Agent --> Validate["Validation + UQ"]
+    Validate --> Output["Matches, answers, traces"]
+
+    classDef boundary fill:#f6f8fa,stroke:#8c959f,color:#1f2328;
+    classDef core fill:#ddf4ff,stroke:#0969da,color:#1f2328;
+    class Input,CLI,Output boundary;
+    class Parser,Workspace,Ontology,Refine,Graph,Embed,Retrieve,Agent,Validate core;
+      </pre>
+    </div>
+    <p class="diagram-caption">The path-based API and CLI share the same parser, graph, retrieval, and reasoning components. Experiments orchestrate this pipeline without entering the library layer.</p>
 
     <h2>Integration pipeline</h2>
     <div class="grid">
@@ -80,6 +113,35 @@
 
     <h2>Agent runtime</h2>
     <p>The public <code>agentoi.agents</code> API exposes the agent, observers, Ontology-of-Thought models, and supported tools. Internally, the agent emits each event once, the OOT observer owns conversation memory, and the thought graph is derived from that memory for persistence and query optimization.</p>
+    <div class="diagram" aria-label="Agent runtime architecture">
+      <pre class="mermaid">
+flowchart TB
+    User["User query"] --> Core["Agent"]
+    Core --> Runtime["ModelRuntime"]
+    Runtime --> LLM["Configured LLM"]
+
+    Core --> Executor["ToolExecutor"]
+    Executor --> Registry["Tool registry"]
+    Registry --> OntTools["Ontology providers"]
+    Registry --> KGTools["Knowledge graph providers"]
+    Registry --> WebTools["Website providers"]
+
+    Core --> Events["Typed event stream"]
+    Events --> Observer["OOTAgentObserver"]
+    Observer --> Memory["MemoryTrace"]
+    Memory --> Thoughts["ThoughtGraph"]
+    Thoughts --> Optimizer["QueryOptimizer"]
+
+    Core --> Persistence["Trace persistence"]
+    Persistence --> Local["Local JSON"]
+    Persistence --> Dynamo["Optional DynamoDB"]
+
+    classDef external fill:#f6f8fa,stroke:#8c959f,color:#1f2328;
+    classDef core fill:#ddf4ff,stroke:#0969da,color:#1f2328;
+    class User,LLM,OntTools,KGTools,WebTools,Local,Dynamo external;
+    class Core,Runtime,Executor,Registry,Events,Observer,Memory,Thoughts,Optimizer,Persistence core;
+      </pre>
+    </div>
     <div class="grid">
       <section class="card"><h3>Core</h3><p><code>Agent</code> coordinates the model and delegates registry-backed calls to the tool executor.</p></section>
       <section class="card"><h3>Events</h3><p>Observers receive one event stream without depending on the agent implementation.</p></section>

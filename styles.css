@@ -432,6 +432,35 @@ th {
   font-weight: 600;
 }
 
+.diagram {
+  overflow-x: auto;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.diagram .mermaid {
+  display: flex;
+  justify-content: center;
+  min-width: 720px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-caption {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 footer {
   margin-top: 40px;
   padding: 24px 0 36px;
