@@ -147,6 +147,8 @@ flowchart TB
     </div>
     <div class="grid">
       <section class="card"><h3>Core</h3><p><code>Agent</code> coordinates the model and delegates registry-backed calls to the tool executor.</p></section>
+      <section class="card"><h3>Routing</h3><p>When enabled, Jev chooses <code>local</code>, <code>standard</code>, or <code>careful</code> once per run and records <code>model.routed</code>.</p></section>
+      <section class="card"><h3>Gating</h3><p>Configured external lookups can be refused before execution. The refusal is <code>tool.blocked</code> on the same trace.</p></section>
       <section class="card"><h3>Events</h3><p>Observers receive one event stream without depending on the agent implementation.</p></section>
       <section class="card"><h3>Memory</h3><p><code>MemoryTrace</code> is the canonical record used to derive a <code>ThoughtGraph</code>.</p></section>
       <section class="card"><h3>Persistence</h3><p>Runtime services serialize traces locally or to DynamoDB without entering the domain layer.</p></section>

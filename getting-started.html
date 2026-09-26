@@ -34,6 +34,7 @@ uv pip install -e ".[openai,knowledge-graph,dev]"</code></pre>
       <tr><td>Google CSE counts</td><td><code>GOOGLE_API_KEY</code>, <code>GOOGLE_CSE_CX</code></td></tr>
       <tr><td>Knowledge graph</td><td><code>NEO4J_URI</code>, <code>NEO4J_USER</code>, <code>NEO4J_PASSWORD</code></td></tr>
       <tr><td>Thought storage</td><td><code>DYNAMO_TABLE</code>, AWS credentials, or <code>AGENTOI_DYNAMO_DISABLED=1</code></td></tr>
+      <tr><td>Jev decisions</td><td><code>JEV_API_KEY</code>, then any of <code>AGENTOI_CONTEXT_HARNESS</code>, <code>AGENTOI_MODEL_ROUTING</code>, <code>AGENTOI_TOOL_GATE</code></td></tr>
     </table>
 
     <h2>Inspect an ontology</h2>
@@ -68,7 +69,21 @@ web = create_web_search("mediawiki")
 index = create_vector_index("torch-exact", dimension=768)</code></pre>
     <p>Use <code>static</code> or <code>dataset</code> for deterministic offline work. Register project-specific web, ANN, DiskANN, or vector-database adapters through the same public retrieval API.</p>
     <p>Optional Jev context selection is separate from retrieval. Install it with <code>uv sync --extra jev</code>, set <code>JEV_API_KEY</code>, and enable <code>AGENTOI_CONTEXT_HARNESS=jev</code>. It starts in shadow mode and fails open to the original shortlist.</p>
-    <p>Optional model routing and tool-risk gating use the same key. Set <code>AGENTOI_MODEL_ROUTING=jev</code> to choose <code>local</code>, <code>standard</code>, or <code>careful</code> once per run, and <code>AGENTOI_TOOL_GATE=jev</code> to block configured external lookups before they execute. Routing fails open to <code>LLM_MODEL</code>. An enabled gate fails closed for gated tools only. Query text and redacted tool arguments are sent to TypeSafe. The choices are recorded on the existing trace as <code>model.routed</code> and <code>tool.blocked</code>.</p>
+
+    <h2>Route models and gate tools</h2>
+    <p>Model routing and tool-risk gating use the same Jev key. They stay off until enabled, and they do not change which evidence the context harness selects.</p>
+    <pre><code>uv sync --extra jev
+export JEV_API_KEY=your_typesafe_api_key
+export AGENTOI_MODEL_ROUTING=jev
+export AGENTOI_ROUTE_LOCAL=ollama:phi3
+export AGENTOI_ROUTE_CAREFUL=deepseek-ai/DeepSeek-R1-Distill-Llama-70B
+export AGENTOI_TOOL_GATE=jev</code></pre>
+    <table>
+      <tr><th>Decision</th><th>What Jev chooses</th><th>If Jev cannot decide</th></tr>
+      <tr><td>Model routing</td><td><code>local</code> for short lookups, <code>standard</code> for normal ontology questions, <code>careful</code> for alignment, conflicts, and multi-ontology reasoning. The chosen model is used for the whole run.</td><td>Fail open to <code>LLM_MODEL</code>.</td></tr>
+      <tr><td>Tool-risk gating</td><td>Whether <code>search_term_context</code> or <code>search_knowledge_graph</code> is unsafe to run. A probability at or above <code>AGENTOI_TOOL_RISK_THRESHOLD</code> (default <code>0.5</code>) returns a refusal and does not call the tool. <code>ontology_term_info</code> is not gated.</td><td>Fail closed for gated tools only.</td></tr>
+    </table>
+    <p>The query and redacted tool arguments are sent to TypeSafe. Routing stores <code>name</code>, <code>model_name</code>, <code>probabilities</code>, <code>confidence</code>, and <code>fail_open</code> on the trace and emits <code>model.routed</code>. A blocked call sets the <code>tool_execute</code> step to <code>blocked</code> and emits <code>tool.blocked</code>.</p>
 
     <h2>Verify</h2>
     <pre><code>python -m pytest -q

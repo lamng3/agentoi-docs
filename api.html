@@ -198,12 +198,32 @@ print(workspace.last_context_selection.metrics())</code></pre>
         <tr><td><code>QueryOptimizer</code></td><td>HumanGS-style candidate selection over thought graphs.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/ontology_of_thought/optimizer.py">optimizer.py</a></td></tr>
         <tr><td><code>Trace</code>, <code>TraceStep</code></td><td>Typed execution trace records.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/runtime/trace.py">trace.py</a></td></tr>
       </table>
-      <pre><code>from agentoi.agents import Agent
+      <pre><code>from agentoi.agents import Agent, JevModelRouter, ToolRiskGate
 
-agent = Agent(llm, tools=[ontology_tool], save_local=True)
+agent = Agent(
+    llm,
+    model_router=JevModelRouter(),
+    tool_gate=ToolRiskGate(threshold=0.5),
+    save_local=True,
+)
 response = agent.invoke("Find the closest ontology concept.")
 run = agent.invoke("Explain the match.", return_trace=True)</code></pre>
-      <p>Set <code>AGENTOI_MODEL_ROUTING=jev</code> and <code>AGENTOI_TOOL_GATE=jev</code> to enable the optional decisions. <code>AGENTOI_ROUTE_LOCAL</code> and <code>AGENTOI_ROUTE_CAREFUL</code> name the models AgentOI already knows how to construct. The default gated tools are <code>search_term_context</code> and <code>search_knowledge_graph</code>; <code>ontology_term_info</code> is a lookup and is not gated. Routing records <code>name</code>, <code>model_name</code>, <code>probabilities</code>, <code>confidence</code>, and <code>fail_open</code> on the <code>model_route</code> trace step and emits <code>model.routed</code>. A block sets the <code>tool_execute</code> step status to <code>blocked</code> and emits <code>tool.blocked</code>. Query text and redacted tool arguments are sent to TypeSafe. If gating is enabled and Jev cannot decide, that gated call fails closed.</p>
+
+      <h3>Model routing</h3>
+      <p><code>create_model_router()</code> returns a router when <code>AGENTOI_MODEL_ROUTING=jev</code>. It asks one choice question, then <code>Agent.invoke</code> uses the selected model for that run.</p>
+      <table>
+        <tr><th>Route</th><th>Criterion</th><th>Model</th></tr>
+        <tr><td><code>local</code></td><td>Short lookups, extraction, and questions answerable from retrieved ontology context.</td><td><code>AGENTOI_ROUTE_LOCAL</code>, default <code>ollama:phi3</code></td></tr>
+        <tr><td><code>standard</code></td><td>Normal ontology question answering and relation lookup.</td><td><code>AGENTOI_ROUTE_STANDARD</code>, default <code>LLM_MODEL</code></td></tr>
+        <tr><td><code>careful</code></td><td>Alignment disputes, conflicts, refinement, or multi-ontology reasoning.</td><td><code>AGENTOI_ROUTE_CAREFUL</code>, default <code>LLM_MODEL</code></td></tr>
+      </table>
+      <p>The <code>model_route</code> step and the <code>llm_invoke</code> step store <code>name</code>, <code>model_name</code>, <code>probabilities</code>, <code>confidence</code>, <code>fail_open</code>, and <code>error</code>. The same payload is emitted as <code>model.routed</code> for Ontology-of-Thought. If Jev is unavailable, the run fails open to the current model.</p>
+
+      <h3>Tool-risk gating</h3>
+      <p><code>create_tool_gate()</code> returns a gate when <code>AGENTOI_TOOL_GATE=jev</code>. It runs after <code>tool.parsed</code> and before tool execution. The default gated tools are <code>search_term_context</code> and <code>search_knowledge_graph</code>. Override them with <code>AGENTOI_GATED_TOOLS</code>. <code>ontology_term_info</code> is not gated.</p>
+      <p>Jev returns the probability that the call is unsafe. A value at or above <code>AGENTOI_TOOL_RISK_THRESHOLD</code> (default <code>0.5</code>) becomes the tool result:</p>
+      <pre><code>{"blocked": true, "tool_name": "search_term_context", "reason": "...", "risk": 0.92}</code></pre>
+      <p>The tool function is not called. The <code>tool_execute</code> step status is <code>blocked</code>, and Ontology-of-Thought receives <code>tool.blocked</code>. Arguments are passed through <code>redact</code> before the request. Query text and those redacted arguments are still sent to TypeSafe. When the gate is enabled and Jev cannot decide, that gated call fails closed. A disabled gate leaves every tool call unchanged.</p>
     </section>
 
     <section id="validation" class="api-section">

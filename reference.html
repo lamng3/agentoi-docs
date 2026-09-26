@@ -35,6 +35,8 @@ agentoi-lint ONTOLOGY.ttl
       <tr><td><code>register_vector_index(name, factory)</code></td><td>Register a vector-index adapter</td></tr>
       <tr><td><code>OnlineOntologyRefiner.refine(graph, updates)</code></td><td>Apply streamed ontology updates and return deferred validation cases</td></tr>
       <tr><td><code>Parser(path).to_ontology()</code></td><td>Parse supported RDF or relation-dataset formats through one facade</td></tr>
+      <tr><td><code>create_model_router()</code></td><td>Choose <code>local</code>, <code>standard</code>, or <code>careful</code> once per run when <code>AGENTOI_MODEL_ROUTING=jev</code></td></tr>
+      <tr><td><code>create_tool_gate()</code></td><td>Block configured external tool calls when <code>AGENTOI_TOOL_GATE=jev</code></td></tr>
     </table>
 
     <h2>Repository layout</h2>
@@ -48,6 +50,16 @@ agentoi-lint ONTOLOGY.ttl
       <tr><td><code>docs/</code></td><td>This static instruction website</td></tr>
       <tr><td><code>results/</code></td><td>Ignored generated artifacts</td></tr>
     </table>
+
+    <h2>Jev environment</h2>
+    <table>
+      <tr><th>Variable</th><th>Purpose</th></tr>
+      <tr><td><code>JEV_API_KEY</code></td><td>TypeSafe key. Copied to <code>TYPESAFE_API_KEY</code> when that variable is empty.</td></tr>
+      <tr><td><code>AGENTOI_CONTEXT_HARNESS</code></td><td>Set to <code>jev</code> to score retrieved context. <code>AGENTOI_CONTEXT_MODE</code> is <code>shadow</code> or <code>live</code>.</td></tr>
+      <tr><td><code>AGENTOI_MODEL_ROUTING</code></td><td>Set to <code>jev</code> to route each run. Pair with <code>AGENTOI_ROUTE_LOCAL</code>, <code>AGENTOI_ROUTE_STANDARD</code>, and <code>AGENTOI_ROUTE_CAREFUL</code>.</td></tr>
+      <tr><td><code>AGENTOI_TOOL_GATE</code></td><td>Set to <code>jev</code> to gate tools. <code>AGENTOI_GATED_TOOLS</code> lists names, and <code>AGENTOI_TOOL_RISK_THRESHOLD</code> defaults to <code>0.5</code>.</td></tr>
+    </table>
+    <p>Routing fails open to <code>LLM_MODEL</code>. An enabled tool gate fails closed for gated tools only. Query text and redacted tool arguments are sent to TypeSafe. Decisions appear on the existing trace as <code>model.routed</code> and <code>tool.blocked</code>.</p>
 
     <h2>Security</h2>
     <pre><code>pre-commit run --all-files
