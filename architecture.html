@@ -61,7 +61,7 @@
       </section>
       <section class="card">
         <h3>Online ontology refinement</h3>
-        <p><code>OnlineOntologyRefiner</code> processes ranked update batches and returns low-confidence, cyclic, or rank-inconsistent updates for expert validation.</p>
+        <p><code>OnlineOntologyRefiner</code> follows KROMA Algorithm 2: recompute and sort ranks, split changed classes, apply rank-specific local merges, and defer low-confidence, cyclic, or rank-inconsistent updates. Both refiners accept configuration W's <code>concept_similar</code> predicate.</p>
       </section>
     </div>
 
