@@ -11,7 +11,7 @@
   <main>
     <p class="eyebrow">Guide 01 · Setup</p>
     <h1>Getting started</h1>
-    <p class="lede">AgentOI requires Python 3.12 and uses uv for reproducible environments.</p>
+    <p class="lede">Install AgentOI, inspect an ontology, and query it directly from the terminal.</p>
 
     <h2>Install</h2>
     <pre><code>git clone https://github.com/lamng3/agentoi.git
@@ -36,12 +36,30 @@ uv pip install -e ".[openai,knowledge-graph,dev]"</code></pre>
       <tr><td>Thought storage</td><td><code>DYNAMO_TABLE</code>, AWS credentials, or <code>AGENTOI_DYNAMO_DISABLED=1</code></td></tr>
     </table>
 
-    <h2>Run</h2>
-    <pre><code>agentoi --ontology envo sweet --top_k 10 --eval_alignment
+    <h2>Inspect an ontology</h2>
+    <pre><code>agentoi inspect data/my-ontology.owl
+agentoi inspect data/my-ontology.ttl --json</code></pre>
+    <p><code>inspect</code> parses local OWL, RDF/XML, Turtle, N-Triples, TriG, TriX, or JSON-LD without loading an embedding or language model.</p>
 
-# Rule-based refinement
-agentoi --ontology envo sweet --top_k 10 --eval_alignment --refine</code></pre>
-    <p>Detailed output is written under <code>results/runs/</code>, outside the package and outside Git.</p>
+    <h2>Search locally</h2>
+    <pre><code>agentoi search data/my-ontology.owl \
+  "water quality measurement" --top-k 8</code></pre>
+    <p>This builds the concept graph and returns the most relevant ontology concepts. The first run may download the configured text embedding model.</p>
+
+    <h2>Ask questions</h2>
+    <pre><code># One question
+agentoi query data/my-ontology.owl \
+  "Which concepts describe freshwater temperature?"
+
+# Interactive terminal session
+agentoi chat data/my-ontology.owl</code></pre>
+    <p>The ontology is parsed and embedded once per command. Interactive mode reuses that graph for every question in the session. Add <code>--refine</code> to apply relation refinement first.</p>
+    <p>For a local model, set <code>LLM_MODEL=ollama:llama3.1</code>. Hosted models require the corresponding API key.</p>
+
+    <h2>Run the evaluation pipeline</h2>
+    <pre><code>agentoi run --ontology envo sweet --top_k 10 --eval_alignment
+agentoi run --ontology envo sweet --eval_alignment --refine</code></pre>
+    <p>Catalog-based evaluation output is written under <code>results/runs/</code>.</p>
 
     <h2>Select retrieval backends</h2>
     <pre><code>from agentoi.retrieval import create_vector_index, create_web_search

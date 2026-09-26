@@ -24,6 +24,7 @@
     <h2>Package map</h2>
     <table>
       <tr><th>Module</th><th>Responsibility</th></tr>
+      <tr><td><code>cli.py</code> and <code>workspace.py</code></td><td>Path-based terminal commands and reusable ontology query sessions</td></tr>
       <tr><td><code>agents/core/</code></td><td>Agent orchestration, typed events, and tool execution</td></tr>
       <tr><td><code>agents/runtime/</code></td><td>Execution traces and local or DynamoDB persistence</td></tr>
       <tr><td><code>agents/ontology_of_thought/</code></td><td>Conversation memory, thought graphs, optimization, and reconstruction</td></tr>
@@ -31,7 +32,7 @@
       <tr><td><code>algorithms/graph/</code></td><td>Ontology, concept, graph, hypergraph, predicates, and shared builders</td></tr>
       <tr><td><code>algorithms/refinement/</code></td><td>Relation, ontology, offline graph, and online stream refinement</td></tr>
       <tr><td><code>algorithms/views/</code></td><td>Hypergraph and multigraph analysis adapters</td></tr>
-      <tr><td><code>parser/</code></td><td>One format-selecting facade over RDF, JSON, and text adapters</td></tr>
+      <tr><td><code>parser/</code></td><td>One format-selecting facade over RDF, JSON, and text adapters; RDF schema declarations stay outside the concept graph</td></tr>
       <tr><td><code>embeddings/encoders/</code></td><td>Text and Node2Vec graph encoders</td></tr>
       <tr><td><code>embeddings/vector_index/</code></td><td>Backend-neutral vector search with an exact Torch implementation</td></tr>
       <tr><td><code>retrieval/</code></td><td>Structural sampling plus named web-search and vector-index plugins</td></tr>

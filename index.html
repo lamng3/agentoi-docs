@@ -35,8 +35,8 @@
 cd agentoi
 ./setup.sh
 source .venv/bin/activate
-<span class="prompt">$</span> agentoi --ontology envo sweet \
-    --top_k 10 --eval_alignment</code></pre>
+<span class="prompt">$</span> agentoi inspect ontology.owl
+<span class="prompt">$</span> agentoi chat ontology.owl</code></pre>
       </div>
     </section>
 
@@ -48,7 +48,7 @@ source .venv/bin/activate
 
     <h2>Workflow</h2>
     <div class="flow">
-      <section class="card"><h3>Parse</h3><p>Normalize RDF, Turtle, JSON, and reference alignments.</p></section>
+      <section class="card"><h3>Parse</h3><p>Load OWL, RDF, Turtle, JSON-LD, and reference alignments.</p></section>
       <section class="card"><h3>Represent</h3><p>Fuse graph structure and semantic text embeddings.</p></section>
       <section class="card"><h3>Reason</h3><p>Apply ontology-aware agents only where ambiguity remains.</p></section>
       <section class="card"><h3>Validate</h3><p>Score, refine, and persist reproducible integrations.</p></section>

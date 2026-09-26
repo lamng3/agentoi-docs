@@ -14,18 +14,20 @@
     <p class="lede">Experiment definitions are JSON. Outputs are generated under <code>results/</code> and are never committed.</p>
 
     <h2>Inspect before running</h2>
-    <pre><code>python -m experiments experiments/configs/quickstart.json --dry-run
-python -m experiments experiments/configs/ablations.json --dry-run</code></pre>
+    <pre><code>./scripts/run_experiments.sh quickstart --dry-run
+./scripts/run_experiments.sh ablations --dry-run</code></pre>
 
     <h2>Run</h2>
     <pre><code># Quick comparison
-python -m experiments experiments/configs/quickstart.json
+./scripts/run_experiments.sh quickstart
 
 # All maintained ablations
-python -m experiments experiments/configs/ablations.json
+./scripts/run_experiments.sh ablations
 
 # One experiment
-python -m experiments experiments/configs/ablations.json --select with-uq</code></pre>
+./scripts/run_experiments.sh ablations --select with-uq</code></pre>
+
+    <p>The equivalent direct command is <code>python -m experiments CONFIG.json</code>. The shell entry point resolves named maintained suites and uses the repository environment.</p>
 
     <h2>Maintained ablations</h2>
     <table>

@@ -14,10 +14,17 @@
 
     <h2>Command-line interfaces</h2>
     <pre><code>agentoi --help
+agentoi inspect ONTOLOGY.owl
+agentoi search ONTOLOGY.owl "natural-language text"
+agentoi query ONTOLOGY.owl "question"
+agentoi chat ONTOLOGY.owl
+agentoi run --help
 agentoi-hypergraph --help
 agentoi-lint ONTOLOGY.ttl
-python -m experiments CONFIG.json --help
-python -m experiments CONFIG.json --dry-run</code></pre>
+./scripts/run_experiments.sh SUITE --dry-run</code></pre>
+
+    <h2>Supported ontology inputs</h2>
+    <p>The path-based CLI detects OWL/RDF XML (<code>.owl</code>, <code>.rdf</code>, <code>.xml</code>), Turtle, N3, N-Triples, TriG, TriX, and JSON-LD. Use <code>--format</code> when a file extension is ambiguous.</p>
 
     <h2>Public extension points</h2>
     <table>
@@ -36,6 +43,7 @@ python -m experiments CONFIG.json --dry-run</code></pre>
       <tr><td><code>tests/</code></td><td>Automated tests</td></tr>
       <tr><td><code>examples/</code></td><td>Runnable examples</td></tr>
       <tr><td><code>experiments/</code></td><td>Runner and maintained configurations</td></tr>
+      <tr><td><code>scripts/</code></td><td>Maintained experiment entry points</td></tr>
       <tr><td><code>data/</code></td><td>Ontology and benchmark data</td></tr>
       <tr><td><code>docs/</code></td><td>This static instruction website</td></tr>
       <tr><td><code>results/</code></td><td>Ignored generated artifacts</td></tr>
