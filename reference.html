@@ -19,6 +19,17 @@ agentoi-lint ONTOLOGY.ttl
 python -m experiments CONFIG.json --help
 python -m experiments CONFIG.json --dry-run</code></pre>
 
+    <h2>Public extension points</h2>
+    <table>
+      <tr><th>API</th><th>Purpose</th></tr>
+      <tr><td><code>create_web_search(name, **options)</code></td><td>Select static, dataset, MediaWiki, Google CSE, or a registered provider</td></tr>
+      <tr><td><code>register_web_search(plugin, factory)</code></td><td>Add a visible project-specific search provider</td></tr>
+      <tr><td><code>create_vector_index(name, **options)</code></td><td>Create exact, ANN, DiskANN, or vector-database indexes</td></tr>
+      <tr><td><code>register_vector_index(name, factory)</code></td><td>Register a vector-index adapter</td></tr>
+      <tr><td><code>OnlineOntologyRefiner.refine(graph, updates)</code></td><td>Apply streamed ontology updates and return deferred validation cases</td></tr>
+      <tr><td><code>Parser(path).to_ontology()</code></td><td>Parse supported RDF or relation-dataset formats through one facade</td></tr>
+    </table>
+
     <h2>Repository layout</h2>
     <table>
       <tr><td><code>src/agentoi/</code></td><td>Installable library</td></tr>

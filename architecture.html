@@ -29,14 +29,16 @@
       <tr><td><code>agents/ontology_of_thought/</code></td><td>Conversation memory, thought graphs, optimization, and reconstruction</td></tr>
       <tr><td><code>agents/tools/</code></td><td>Shared registry plus ontology, knowledge-graph, and website providers</td></tr>
       <tr><td><code>algorithms/graph/</code></td><td>Ontology, concept, graph, hypergraph, predicates, and shared builders</td></tr>
-      <tr><td><code>algorithms/refinement/</code></td><td>Relation, ontology, and graph refinement services</td></tr>
+      <tr><td><code>algorithms/refinement/</code></td><td>Relation, ontology, offline graph, and online stream refinement</td></tr>
       <tr><td><code>algorithms/views/</code></td><td>Hypergraph and multigraph analysis adapters</td></tr>
-      <tr><td><code>parser/</code></td><td>RDF, Turtle, JSON, and alignment parsing</td></tr>
+      <tr><td><code>parser/</code></td><td>One format-selecting facade over RDF, JSON, and text adapters</td></tr>
       <tr><td><code>embeddings/encoders/</code></td><td>Text and Node2Vec graph encoders</td></tr>
       <tr><td><code>embeddings/vector_index/</code></td><td>Backend-neutral vector search with an exact Torch implementation</td></tr>
-      <tr><td><code>functions/similarity/</code></td><td>Public similarity API, shared node-pair engine, embedding integration, and pluggable web-count providers</td></tr>
-      <tr><td><code>validation/</code></td><td>Metrics, rules, expert review, and tuple evaluation</td></tr>
-      <tr><td><code>uq/</code></td><td>Black-box, graph, and ensemble uncertainty scoring</td></tr>
+      <tr><td><code>retrieval/</code></td><td>Structural sampling plus named web-search and vector-index plugins</td></tr>
+      <tr><td><code>functions/similarity/</code></td><td>Cosine, normalized web distance, hybrid, and cross-graph scoring</td></tr>
+      <tr><td><code>prompting/</code></td><td>Typed ontology-equivalence prompts and machine-readable answer parsing</td></tr>
+      <tr><td><code>validation/</code></td><td>Alignment metrics, validation rules, tuple evaluation, pipelines, and ontology linting</td></tr>
+      <tr><td><code>uq/</code></td><td>Dependency-free agreement scoring and optional UQLM, graph, and ensemble backends</td></tr>
     </table>
 
     <h2>Algorithm extension points</h2>
@@ -57,6 +59,10 @@
         <h3>Offline graph refinement</h3>
         <p>Use <code>OfflineGraphRefiner</code> for deterministic structural collapse and partition refinement over a complete graph.</p>
       </section>
+      <section class="card">
+        <h3>Online ontology refinement</h3>
+        <p><code>OnlineOntologyRefiner</code> processes ranked update batches and returns low-confidence, cyclic, or rank-inconsistent updates for expert validation.</p>
+      </section>
     </div>
 
     <h2>Vector retrieval</h2>
@@ -65,11 +71,11 @@
       <section class="card"><h3>Encoders</h3><p><code>TextEmbedding</code> and <code>GraphEmbedding</code> implement small encoder contracts and can be replaced independently.</p></section>
       <section class="card"><h3>Fusion</h3><p><code>fuse_embeddings</code> validates dimensions and applies the configured graph/text weighting.</p></section>
       <section class="card"><h3>Exact search</h3><p><code>TorchExactVectorIndex</code> provides deterministic cosine retrieval for current experiments and tests.</p></section>
-      <section class="card"><h3>Additional backends</h3><p><code>register_vector_index</code> supports optional ANN, DiskANN, and vector-database adapters without coupling them to graph models.</p></section>
+      <section class="card"><h3>Additional backends</h3><p><code>register_vector_index</code> supports optional ANN, DiskANN, and vector-database adapters. Select one through <code>index_backend</code> on graph retrieval.</p></section>
     </div>
 
-    <h2>Similarity providers</h2>
-    <p>Cosine, normalized web-distance, hybrid, and cross-graph scoring share one node-pair engine. The embedding-aware factory defaults to a seeded dataset provider for deterministic offline runs. Network-backed MediaWiki and Google CSE providers implement the same <code>WebSearchProvider</code> interface and are injected explicitly when required.</p>
+    <h2>Retrieval plugins</h2>
+    <p>Use <code>create_web_search</code> with <code>static</code>, <code>dataset</code>, <code>mediawiki</code>, or <code>google-cse</code>. Each provider has visible metadata describing network access and required environment variables. Use <code>register_web_search</code> for a project-specific index. Normalized Google Distance receives the selected provider explicitly and does not hide a network service inside similarity code.</p>
 
     <h2>Agent runtime</h2>
     <p>The public <code>agentoi.agents</code> API exposes the agent, observers, Ontology-of-Thought models, and supported tools. Internally, the agent emits each event once, the OOT observer owns conversation memory, and the thought graph is derived from that memory for persistence and query optimization.</p>

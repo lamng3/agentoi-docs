@@ -31,6 +31,7 @@ uv pip install -e ".[openai,knowledge-graph,dev]"</code></pre>
       <tr><td>Model</td><td><code>LLM_MODEL</code>, one provider API key</td></tr>
       <tr><td>Ontology lookup</td><td><code>BIOPORTAL_API_KEY</code></td></tr>
       <tr><td>Web lookup</td><td><code>TAVILY_API_KEY</code></td></tr>
+      <tr><td>Google CSE counts</td><td><code>GOOGLE_API_KEY</code>, <code>GOOGLE_CSE_CX</code></td></tr>
       <tr><td>Knowledge graph</td><td><code>NEO4J_URI</code>, <code>NEO4J_USER</code>, <code>NEO4J_PASSWORD</code></td></tr>
       <tr><td>Thought storage</td><td><code>DYNAMO_TABLE</code>, AWS credentials, or <code>AGENTOI_DYNAMO_DISABLED=1</code></td></tr>
     </table>
@@ -41,6 +42,13 @@ uv pip install -e ".[openai,knowledge-graph,dev]"</code></pre>
 # Rule-based refinement
 agentoi --ontology envo sweet --top_k 10 --eval_alignment --refine</code></pre>
     <p>Detailed output is written under <code>results/runs/</code>, outside the package and outside Git.</p>
+
+    <h2>Select retrieval backends</h2>
+    <pre><code>from agentoi.retrieval import create_vector_index, create_web_search
+
+web = create_web_search("mediawiki")
+index = create_vector_index("torch-exact", dimension=768)</code></pre>
+    <p>Use <code>static</code> or <code>dataset</code> for deterministic offline work. Register project-specific web, ANN, DiskANN, or vector-database adapters through the same public retrieval API.</p>
 
     <h2>Verify</h2>
     <pre><code>python -m pytest -q
