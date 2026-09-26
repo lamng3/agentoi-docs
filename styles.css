@@ -500,6 +500,14 @@ footer {
   }
 }
 
+.demo-shot {
+  display: block;
+  width: min(100%, 820px);
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
 @media (max-width: 560px) {
   header {
     display: block;
