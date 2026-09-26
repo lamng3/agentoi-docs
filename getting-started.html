@@ -67,6 +67,7 @@ agentoi run --ontology envo sweet --eval_alignment --refine</code></pre>
 web = create_web_search("mediawiki")
 index = create_vector_index("torch-exact", dimension=768)</code></pre>
     <p>Use <code>static</code> or <code>dataset</code> for deterministic offline work. Register project-specific web, ANN, DiskANN, or vector-database adapters through the same public retrieval API.</p>
+    <p>Optional Jev context selection is separate from retrieval. Install it with <code>uv sync --extra jev</code>, set <code>JEV_API_KEY</code>, and enable <code>AGENTOI_CONTEXT_HARNESS=jev</code>. It starts in shadow mode and fails open to the original shortlist.</p>
 
     <h2>Verify</h2>
     <pre><code>python -m pytest -q

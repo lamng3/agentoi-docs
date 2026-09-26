@@ -44,7 +44,7 @@
         <tr><td><code>summary</code></td><td><code>OntologySummary</code></td><td>Path, format, ontology name, version, concept count, and relation count.</td></tr>
         <tr><td><code>prepare()</code></td><td><code>ConceptGraph</code></td><td>Build and embed the graph once, then cache it.</td></tr>
         <tr><td><code>search(query, *, top_k=10)</code></td><td><code>list[dict[str, Any]]</code></td><td>Retrieve concepts without invoking an LLM.</td></tr>
-        <tr><td><code>ask(query, *, top_k=10, model=None, temperature=0.2, save_traces=False)</code></td><td><code>str</code></td><td>Generate an answer using retrieved ontology context.</td></tr>
+        <tr><td><code>ask(query, *, top_k=10, model=None, temperature=0.2, save_traces=False, harness=None, web_passages=None)</code></td><td><code>str</code></td><td>Generate an answer from retrieved context. An optional harness can select that context.</td></tr>
       </table>
       <pre><code>from agentoi.workspace import OntologyWorkspace
 
@@ -168,6 +168,21 @@ provider = create_web_search("mediawiki", lang="en", project="wikipedia")
 print(describe_web_search("mediawiki"))
 count = provider.search_count("ontology matching")</code></pre>
       <p><a class="source-link" href="https://github.com/lamng3/agentoi/tree/master/src/agentoi/retrieval">Retrieval source →</a> <a class="source-link" href="https://github.com/lamng3/agentoi/blob/master/examples/retrieval_plugins.py">Plugin example →</a></p>
+
+      <h2>Context harness</h2>
+      <p>Retrieval remains responsible for recall. The harness decides which retrieved concepts, neighbors, and web passages enter the prompt.</p>
+      <table>
+        <tr><th>Class</th><th>Behavior</th><th>Source</th></tr>
+        <tr><td><code>PassthroughHarness</code></td><td>Returns the original shortlist. This is the default.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/retrieval/context.py">context.py</a></td></tr>
+        <tr><td><code>JevContextHarness</code></td><td>Uses Jev contextual scoring to filter and rerank. Shadow mode records the proposal while still returning the original shortlist.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/retrieval/context.py">context.py</a></td></tr>
+        <tr><td><code>create_context_harness(name=None)</code></td><td>Reads <code>AGENTOI_CONTEXT_HARNESS</code>. <code>jev</code> starts in shadow mode unless <code>AGENTOI_CONTEXT_MODE=live</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/retrieval/context.py">context.py</a></td></tr>
+      </table>
+      <pre><code>from agentoi.retrieval import JevContextHarness
+
+harness = JevContextHarness(shadow=True, min_relevance=0.2)
+answer = workspace.ask(question, harness=harness)
+print(workspace.last_context_selection.metrics())</code></pre>
+      <p class="note">Jev is optional: <code>uv sync --extra jev</code> and <code>JEV_API_KEY</code>. Query text, concept labels, and web snippets are sent to TypeSafe. If the key is missing or Jev fails, the harness fails open and returns the original shortlist.</p>
     </section>
 
     <section id="agents" class="api-section">
