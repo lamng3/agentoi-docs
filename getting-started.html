@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Getting Started · AgentOI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header><a href="index.html"><strong>AgentOI</strong></a><nav><a class="active" href="getting-started.html">Get started</a><a href="architecture.html">Architecture</a><a href="experiments.html">Experiments</a><a href="reference.html">Reference</a></nav></header>
+  <main>
+    <p class="eyebrow">Guide 01 · Setup</p>
+    <h1>Getting started</h1>
+    <p class="lede">AgentOI requires Python 3.12 and uses uv for reproducible environments.</p>
+
+    <h2>Install</h2>
+    <pre><code>git clone https://github.com/lamng3/agentoi.git
+cd agentoi
+./setup.sh
+source .venv/bin/activate</code></pre>
+    <p>For a smaller installation, select only the provider integrations you need:</p>
+    <pre><code>uv venv --python 3.12
+source .venv/bin/activate
+uv pip install -e ".[openai,knowledge-graph,dev]"</code></pre>
+
+    <h2>Configure</h2>
+    <pre><code>cp .env.example .env</code></pre>
+    <p>Set one model provider and any retrieval services required by your workflow.</p>
+    <table>
+      <tr><th>Purpose</th><th>Variables</th></tr>
+      <tr><td>Model</td><td><code>LLM_MODEL</code>, one provider API key</td></tr>
+      <tr><td>Ontology lookup</td><td><code>BIOPORTAL_API_KEY</code></td></tr>
+      <tr><td>Web lookup</td><td><code>TAVILY_API_KEY</code></td></tr>
+      <tr><td>Knowledge graph</td><td><code>NEO4J_URI</code>, <code>NEO4J_USER</code>, <code>NEO4J_PASSWORD</code></td></tr>
+      <tr><td>Thought storage</td><td><code>DYNAMO_TABLE</code>, AWS credentials, or <code>AGENTOI_DYNAMO_DISABLED=1</code></td></tr>
+    </table>
+
+    <h2>Run</h2>
+    <pre><code>agentoi --ontology envo sweet --top_k 10 --eval_alignment
+
+# Rule-based refinement
+agentoi --ontology envo sweet --top_k 10 --eval_alignment --refine</code></pre>
+    <p>Detailed output is written under <code>results/runs/</code>, outside the package and outside Git.</p>
+
+    <h2>Verify</h2>
+    <pre><code>python -m pytest -q
+pre-commit run --all-files</code></pre>
+  </main>
+  <footer><a href="index.html">Documentation home</a></footer>
+</body>
+</html>
