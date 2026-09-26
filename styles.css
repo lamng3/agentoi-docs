@@ -359,30 +359,55 @@ th {
   background: #f0f6ff;
 }
 
+.api-layout {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  align-items: start;
+  gap: 40px;
+  margin-top: 40px;
+}
+
 .api-index {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 14px;
+  position: sticky;
+  top: 88px;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
 }
 
+.api-index strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .api-index a {
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--background);
+  display: block;
+  padding: 5px 8px;
+  color: var(--muted);
+  border-radius: 5px;
   font-size: 0.9rem;
+}
+
+.api-index a:hover {
+  color: var(--accent);
+  background: var(--background);
+  text-decoration: none;
+}
+
+.api-content {
+  min-width: 0;
 }
 
 .api-section {
   scroll-margin-top: 80px;
 }
 
-.api-section h2 {
-  margin-top: 64px;
+.api-content > .api-section:first-child h2 {
+  margin-top: 0;
 }
 
 .signature {
@@ -428,6 +453,21 @@ footer {
 
   .flow {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .api-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .api-index {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .api-index strong {
+    grid-column: 1 / -1;
   }
 }
 
