@@ -13,6 +13,11 @@
     <h1>Experiments</h1>
     <p class="lede">Experiment definitions are JSON. Outputs are generated under <code>results/</code> and are never committed.</p>
 
+    <h2>Fetch benchmark data</h2>
+    <pre><code>git lfs install
+git lfs pull</code></pre>
+    <p>Bundled OWL, RDF, Turtle, and model artifacts use Git LFS. Fetch them before running maintained suites; dry runs do not require the data.</p>
+
     <h2>Inspect before running</h2>
     <pre><code>./scripts/run_experiments.sh quickstart --dry-run
 ./scripts/run_experiments.sh ablations --dry-run</code></pre>
