@@ -59,6 +59,7 @@ flowchart LR
       <tr><th>Module</th><th>Responsibility</th></tr>
       <tr><td><code>cli.py</code> and <code>workspace.py</code></td><td>Path-based terminal commands and reusable ontology query sessions</td></tr>
       <tr><td><code>agents/core/</code></td><td>Agent orchestration, typed events, and tool execution</td></tr>
+      <tr><td><code>agents/decisions.py</code></td><td>Optional Jev model routing and tool-risk gating, recorded on the existing trace</td></tr>
       <tr><td><code>agents/runtime/</code></td><td>Execution traces and local or DynamoDB persistence</td></tr>
       <tr><td><code>agents/ontology_of_thought/</code></td><td>Conversation memory, thought graphs, optimization, and reconstruction</td></tr>
       <tr><td><code>agents/tools/</code></td><td>Shared registry plus ontology, knowledge-graph, and website providers</td></tr>
@@ -112,15 +113,17 @@ flowchart LR
     <p>Use <code>create_web_search</code> with <code>static</code>, <code>dataset</code>, <code>mediawiki</code>, or <code>google-cse</code>. Each provider has visible metadata describing network access and required environment variables. Use <code>register_web_search</code> for a project-specific index. Normalized Google Distance receives the selected provider explicitly and does not hide a network service inside similarity code.</p>
 
     <h2>Agent runtime</h2>
-    <p>The public <code>agentoi.agents</code> API exposes the agent, observers, Ontology-of-Thought models, and supported tools. Internally, the agent emits each event once, the OOT observer owns conversation memory, and the thought graph is derived from that memory for persistence and query optimization.</p>
+    <p>The public <code>agentoi.agents</code> API exposes the agent, observers, Ontology-of-Thought models, and supported tools. Internally, the agent emits each event once, the OOT observer owns conversation memory, and the thought graph is derived from that memory for persistence and query optimization. Optional Jev routing and gating add <code>model.routed</code> and <code>tool.blocked</code> to that same event stream. They stay off unless configured, and they do not replace the context harness that selects evidence before prompting.</p>
     <div class="diagram" aria-label="Agent runtime architecture">
       <pre class="mermaid">
 flowchart TB
-    User["User query"] --> Core["Agent"]
+    User["User query"] --> Router["Optional model router"]
+    Router --> Core["Agent"]
     Core --> Runtime["ModelRuntime"]
-    Runtime --> LLM["Configured LLM"]
+    Runtime --> LLM["Selected LLM"]
 
-    Core --> Executor["ToolExecutor"]
+    Core --> Gate["Optional tool-risk gate"]
+    Gate --> Executor["ToolExecutor"]
     Executor --> Registry["Tool registry"]
     Registry --> OntTools["Ontology providers"]
     Registry --> KGTools["Knowledge graph providers"]
@@ -139,7 +142,7 @@ flowchart TB
     classDef external fill:#f6f8fa,stroke:#8c959f,color:#1f2328;
     classDef core fill:#ddf4ff,stroke:#0969da,color:#1f2328;
     class User,LLM,OntTools,KGTools,WebTools,Local,Dynamo external;
-    class Core,Runtime,Executor,Registry,Events,Observer,Memory,Thoughts,Optimizer,Persistence core;
+    class Core,Router,Runtime,Gate,Executor,Registry,Events,Observer,Memory,Thoughts,Optimizer,Persistence core;
       </pre>
     </div>
     <div class="grid">

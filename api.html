@@ -191,6 +191,8 @@ print(workspace.last_context_selection.metrics())</code></pre>
       <table>
         <tr><th>Class / function</th><th>Purpose</th><th>Source</th></tr>
         <tr><td><code>Agent</code></td><td>Model invocation, registered tools, events, traces, and persistence.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/core/agent.py">agent.py</a></td></tr>
+        <tr><td><code>JevModelRouter</code></td><td>Asks Jev one choice question and selects <code>local</code>, <code>standard</code>, or <code>careful</code> for the rest of the run. Unavailable Jev fails open to the current model.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/decisions.py">decisions.py</a></td></tr>
+        <tr><td><code>ToolRiskGate</code></td><td>Asks Jev whether a configured tool call is unsafe. A probability at or above the threshold returns a refusal and does not call the tool.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/decisions.py">decisions.py</a></td></tr>
         <tr><td><code>create_oot_enhanced_agent(...)</code></td><td>Construct an agent with Ontology-of-Thought observation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/observers/oot.py">oot.py</a></td></tr>
         <tr><td><code>ThoughtGraph</code></td><td>Structured thought representation and query-node optimization.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/ontology_of_thought/graph.py">graph.py</a></td></tr>
         <tr><td><code>QueryOptimizer</code></td><td>HumanGS-style candidate selection over thought graphs.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/ontology_of_thought/optimizer.py">optimizer.py</a></td></tr>
@@ -201,6 +203,7 @@ print(workspace.last_context_selection.metrics())</code></pre>
 agent = Agent(llm, tools=[ontology_tool], save_local=True)
 response = agent.invoke("Find the closest ontology concept.")
 run = agent.invoke("Explain the match.", return_trace=True)</code></pre>
+      <p>Set <code>AGENTOI_MODEL_ROUTING=jev</code> and <code>AGENTOI_TOOL_GATE=jev</code> to enable the optional decisions. <code>AGENTOI_ROUTE_LOCAL</code> and <code>AGENTOI_ROUTE_CAREFUL</code> name the models AgentOI already knows how to construct. The default gated tools are <code>search_term_context</code> and <code>search_knowledge_graph</code>; <code>ontology_term_info</code> is a lookup and is not gated. Routing records <code>name</code>, <code>model_name</code>, <code>probabilities</code>, <code>confidence</code>, and <code>fail_open</code> on the <code>model_route</code> trace step and emits <code>model.routed</code>. A block sets the <code>tool_execute</code> step status to <code>blocked</code> and emits <code>tool.blocked</code>. Query text and redacted tool arguments are sent to TypeSafe. If gating is enabled and Jev cannot decide, that gated call fails closed.</p>
     </section>
 
     <section id="validation" class="api-section">
