@@ -19,16 +19,16 @@
 cat results/experiments/smoke/summary.md</code></pre>
     <p>This fast benchmark compares baseline relation normalization with structural refinement, then reports their precision, recall, and F1. It requires no LLM, network access, or model download. On the second run, the report marks each variant reproducible when its metric fingerprint matches the previous run for the same configuration and source revision.</p>
 
-    <h2>Compare context selection</h2>
-    <pre><code>./scripts/run_experiments.sh context</code></pre>
-    <p>This local comparison scores the same retrieved shortlist with passthrough context and a shadow Jev policy. It reports selection precision, recall, F1, returned context size, and rejection rate without calling the Jev API. Live Jev scoring remains opt-in through <code>AGENTOI_CONTEXT_HARNESS=jev</code>.</p>
-
     <h2>Hosted tracking</h2>
     <pre><code>uv sync --extra tracking
 uv run wandb login
 ./scripts/run_experiments.sh smoke --tracker wandb</code></pre>
     <p>AgentOI publishes a comparison table, scalar metrics, logs, manifests, and generated figures to Weights &amp; Biases. Temporary local artifacts are deleted after a successful upload. Set <code>WANDB_PROJECT</code> and optional <code>WANDB_ENTITY</code> to choose the destination, or add <code>--keep-local</code> to retain both copies.</p>
     <p class="note">Hosted artifacts can contain ontology-derived output. Use a private W&amp;B project and confirm your data policy before enabling remote tracking.</p>
+
+    <h2>Compare context selection</h2>
+    <pre><code>./scripts/run_experiments.sh context</code></pre>
+    <p>This local comparison scores the same retrieved shortlist with passthrough context and a shadow Jev policy. It reports selection precision, recall, F1, returned context size, and rejection rate without calling the Jev API. Live Jev scoring remains opt-in through <code>AGENTOI_CONTEXT_HARNESS=jev</code>.</p>
 
     <h2>Fetch benchmark data</h2>
     <pre><code>git lfs install

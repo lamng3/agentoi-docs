@@ -91,9 +91,9 @@ triples = Parser("domain.owl").extract_triples()</code></pre>
         <tr><td><code>Concept</code></td><td>Ontology concept with labels, synonyms, definitions, and typed adjacency.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/concept.py">concept.py</a></td></tr>
         <tr><td><code>ConceptRelation</code></td><td>Directed predicate between two concepts.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/concept.py">concept.py</a></td></tr>
         <tr><td><code>Ontology</code></td><td>Mutable concept and relation collection with union, noise, serialization, and lookup operations.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/ontology.py">ontology.py</a></td></tr>
-        <tr><td><code>EquivalentClass</code></td><td>Semantically equivalent concepts represented as one graph node.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/equivalence.py">equivalence.py</a></td></tr>
+        <tr><td><code>EquivalentClass</code></td><td>One or more semantically equivalent concepts represented as a graph node.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/equivalence.py">equivalence.py</a></td></tr>
         <tr><td><code>ConceptGraph</code></td><td>Pairwise equivalent-class graph with embedding search and rank computation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/concept_graph.py">concept_graph.py</a></td></tr>
-        <tr><td><code>ConceptHypergraph</code></td><td>Hyperedge representation with pairwise projection for retrieval.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/hypergraph.py">hypergraph.py</a></td></tr>
+        <tr><td><code>ConceptHypergraph</code></td><td>Hyperedge representation with pairwise projection for embeddings and retrieval.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/hypergraph.py">hypergraph.py</a></td></tr>
         <tr><td><code>OntologyStructureBuilder</code></td><td>Shared builder for graph representations.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/graph/builder.py">builder.py</a></td></tr>
       </table>
       <pre><code>from agentoi.algorithms.graph import ConceptGraph
@@ -114,22 +114,24 @@ neighbors = graph.nearest_nodes("material fatigue", k=10)</code></pre>
         <tr><td><code>OntologyRefiner</code></td><td><code>refine(ontology, options=None, *, fallback_if_expanded=False) -&gt; Ontology</code><br>Rule-based relation and ontology rebuilding.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/ontology.py">ontology.py</a></td></tr>
         <tr><td><code>OfflineGraphRefiner</code></td><td><code>refine(graph) -&gt; ConceptGraph</code><br>Complete-graph partition refinement and safe bisimilar collapse.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/offline.py">offline.py</a></td></tr>
         <tr><td><code>OnlineOntologyRefiner</code></td><td><code>refine(graph, updates, *, copy_graph=True) -&gt; OnlineRefinementResult</code><br>Rank-aware streamed maintenance with applied and deferred updates.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/online.py">online.py</a></td></tr>
-        <tr><td><code>GraphUpdate</code></td><td>Typed source, target, relation, score, confidence, and semantic judgment.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/online.py">online.py</a></td></tr>
+        <tr><td><code>GraphUpdate</code></td><td>Typed source, target, relation, score, confidence, and optional semantic judgment.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/online.py">online.py</a></td></tr>
         <tr><td><code>RelationRefiner</code></td><td>Configurable rule pipeline returning structured diagnostics.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/algorithms/refinement/pipeline.py">pipeline.py</a></td></tr>
       </table>
-      <pre><code>from agentoi.algorithms.refinement import GraphUpdate, OfflineGraphRefiner, OnlineOntologyRefiner
+      <pre><code>from agentoi.algorithms.refinement import (
+    GraphUpdate,
+    OfflineGraphRefiner,
+    OnlineOntologyRefiner,
+)
 
-collapsed = OfflineGraphRefiner(
-    concept_similar=my_semantic_predicate,
-).refine(graph)
+offline = OfflineGraphRefiner(concept_similar=my_semantic_predicate)
+collapsed = offline.refine(graph)
+
 online = OnlineOntologyRefiner(
     concept_similar=my_semantic_predicate,
     confidence_threshold=8.5,
 )
-result = online.refine(
-    collapsed,
-    [GraphUpdate(source, target, confidence=9.2)],
-)</code></pre>
+result = online.refine(collapsed, [GraphUpdate(source, target, confidence=9.2)])
+print(result.applied_updates, result.deferred_updates)</code></pre>
     </section>
 
     <section id="embeddings" class="api-section">
@@ -138,14 +140,14 @@ result = online.refine(
       <table>
         <tr><th>API</th><th>Supported behavior</th><th>Source</th></tr>
         <tr><td><code>TextEmbedding(model_name="Qwen/Qwen3-Embedding-0.6B", device=None)</code></td><td>Replaceable text encoder backed by Sentence Transformers.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/encoders/text.py">text.py</a></td></tr>
-        <tr><td><code>GraphEmbedding(..., dimensions=128, **node2vec_options)</code></td><td>Node2Vec encoder for graphs and projected hypergraphs.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/encoders/graph.py">graph.py</a></td></tr>
+        <tr><td><code>GraphEmbedding(..., dimensions=128, **node2vec_options)</code></td><td>Node2Vec graph encoder for concept graphs and projected hypergraphs.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/encoders/graph.py">graph.py</a></td></tr>
         <tr><td><code>fuse_embeddings(...)</code></td><td>Validated weighted graph/text vector fusion.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/fusion.py">fusion.py</a></td></tr>
         <tr><td><code>TorchExactVectorIndex(dimension=None)</code></td><td>Built-in deterministic cosine index with ID filtering.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/vector_index/torch_exact.py">torch_exact.py</a></td></tr>
         <tr><td><code>BaseVectorIndex</code></td><td>Adapter base for ANN, DiskANN, or vector-database integrations.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/vector_index/base.py">base.py</a></td></tr>
-        <tr><td><code>register_vector_index(name, factory)</code></td><td>Register a backend used by <code>create_vector_index</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/vector_index/registry.py">registry.py</a></td></tr>
+        <tr><td><code>register_vector_index(name, factory)</code></td><td>Register a named backend used by <code>create_vector_index</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/embeddings/vector_index/registry.py">registry.py</a></td></tr>
       </table>
       <p class="note"><strong>Built in:</strong> <code>torch-exact</code>. ANN, DiskANN, and vector-database backends are supported as adapters but are not bundled implementations.</p>
-      <pre><code>from agentoi.retrieval import create_vector_index
+      <pre><code>from agentoi.retrieval import create_vector_index, register_vector_index
 
 index = create_vector_index("torch-exact", dimension=768)
 index.add(ids, vectors, metadata)
@@ -162,7 +164,11 @@ results = index.search(query_vector, k=10)</code></pre>
         <tr><td><code>mediawiki</code></td><td>Yes</td><td>Language and Wikimedia project.</td></tr>
         <tr><td><code>google-cse</code></td><td>Yes</td><td><code>GOOGLE_API_KEY</code> and <code>GOOGLE_CSE_CX</code>.</td></tr>
       </table>
-      <pre><code>from agentoi.retrieval import create_web_search, describe_web_search
+      <pre><code>from agentoi.retrieval import (
+    create_web_search,
+    describe_web_search,
+    register_web_search,
+)
 
 provider = create_web_search("mediawiki", lang="en", project="wikipedia")
 print(describe_web_search("mediawiki"))
@@ -190,7 +196,7 @@ print(workspace.last_context_selection.metrics())</code></pre>
       <h2>Agent runtime</h2>
       <table>
         <tr><th>Class / function</th><th>Purpose</th><th>Source</th></tr>
-        <tr><td><code>Agent</code></td><td>Model invocation, registered tools, events, traces, and persistence.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/core/agent.py">agent.py</a></td></tr>
+        <tr><td><code>Agent</code></td><td>Model invocation, registered tool execution, events, traces, and optional persistence.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/core/agent.py">agent.py</a></td></tr>
         <tr><td><code>JevModelRouter</code></td><td>Asks Jev one choice question and selects <code>local</code>, <code>standard</code>, or <code>careful</code> for the rest of the run. Unavailable Jev fails open to the current model.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/decisions.py">decisions.py</a></td></tr>
         <tr><td><code>ToolRiskGate</code></td><td>Asks Jev whether a configured tool call is unsafe. A probability at or above the threshold returns a refusal and does not call the tool.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/decisions.py">decisions.py</a></td></tr>
         <tr><td><code>create_oot_enhanced_agent(...)</code></td><td>Construct an agent with Ontology-of-Thought observation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/agents/observers/oot.py">oot.py</a></td></tr>
@@ -232,7 +238,7 @@ run = agent.invoke("Explain the match.", return_trace=True)</code></pre>
       <table>
         <tr><th>API</th><th>Input → output</th><th>Source</th></tr>
         <tr><td><code>evaluate_alignment(expected, predicted)</code></td><td>Alignment pairs → <code>AlignmentMetrics</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/metrics.py">metrics.py</a></td></tr>
-        <tr><td><code>ValidationPipeline</code></td><td>Tuples → normalization, evaluation, and ontology translation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/pipeline.py">pipeline.py</a></td></tr>
+        <tr><td><code>ValidationPipeline</code></td><td>Tuples → normalization, evaluation, and optional ontology translation.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/pipeline.py">pipeline.py</a></td></tr>
         <tr><td><code>TupleEvaluator</code></td><td><code>Sequence[str]</code> → <code>TupleEvaluation</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/tuples.py">tuples.py</a></td></tr>
         <tr><td><code>validate_matches(...)</code></td><td>Candidate matches → <code>ValidationReport</code>.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/rules.py">rules.py</a></td></tr>
         <tr><td><code>agentoi-lint</code></td><td>Ontology file → terminal diagnostics and process status.</td><td><a href="https://github.com/lamng3/agentoi/blob/master/src/agentoi/validation/ontology_lint.py">ontology_lint.py</a></td></tr>
@@ -245,7 +251,10 @@ run = agent.invoke("Explain the match.", return_trace=True)</code></pre>
       <pre class="signature"><code>OntologyEquivalencePromptBuilder(
     config: PromptConfig | None = None,
 ).build(source: object, target: object) -&gt; str</code></pre>
-      <pre><code>from agentoi.prompting import OntologyEquivalencePromptBuilder, parse_equivalence_answer
+      <pre><code>from agentoi.prompting import (
+    OntologyEquivalencePromptBuilder,
+    parse_equivalence_answer,
+)
 
 prompt = OntologyEquivalencePromptBuilder().build(source, target)
 decision = parse_equivalence_answer(model.invoke(prompt).content)</code></pre>
